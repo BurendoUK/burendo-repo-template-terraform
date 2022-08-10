@@ -73,4 +73,3 @@ def assumed_role_session(role_arn: str, base_session: botocore.session.Session =
 
 if __name__ == "__main__":
     main()
-    
