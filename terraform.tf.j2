@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.2.6"
+  required_version = "{{terraform.terraform_version}}"
 
   backend "s3" {
     bucket         = "{{terraform.state_file_bucket}}"
