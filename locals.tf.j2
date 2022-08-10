@@ -1,0 +1,12 @@
+locals {
+  environment = terraform.workspace == "default" ? "burendo-prod" : terraform.workspace
+  account = {
+    "burendo-prod" = "{{terraform.aws_production_acc}}"
+  }
+
+  tags = {
+    Environment = local.environment
+    Company     = "Burendo"
+    Practice    = "Engineering"
+  }
+}
