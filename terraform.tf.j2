@@ -1,0 +1,26 @@
+terraform {
+  required_version = "1.2.6"
+
+  backend "s3" {
+    bucket         = "{{terraform.state_file_bucket}}"
+    key            = "terraform/burendo/example.tfstate"
+    region         = "{{terraform.state_file_region}}"
+    encrypt        = false
+    dynamodb_table = "terraform-state-lock"
+    kms_key_id     = "{{terraform.state_kms_key_id}}"
+  }
+
+  required_providers {
+    aws = {
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "{{terraform.state_file_region}}"
+  
+  assume_role {
+    role_arn = "arn:aws:iam::${lookup(local.account, local.environment)}:role/${var.assume_role}"
+  }
+}
