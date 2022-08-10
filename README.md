@@ -10,7 +10,7 @@ This repo contains Makefile to fit the standard pattern. This repo is a base to 
 
 Replace any mentions of `example` with the name of your new repository, e.g. `burendo-my-service`
 
-Create your AWS session with the cli, and assume the `Administrator` role. For this I persoanlly use [awsume](https://awsu.me/).
+Create your AWS session with the cli, and assume the `Administrator` role. For this I personally use [awsume](https://awsu.me/).
 
 then:
 
