@@ -1,0 +1,20 @@
+#  Local .terraform directories
+**/.terraform/*
+.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+# generated files
+*.iml
+.idea/
+.terraform.lock.hcl
+
+# bootstrap generated files
+**/terraform.tf
+**/locals.tf
+**/variables.tf
