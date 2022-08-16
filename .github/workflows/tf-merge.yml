@@ -1,0 +1,88 @@
+name: "Merge to Main"
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
+      - ".github/workflows/**"
+  workflow_dispatch: {}
+
+jobs:
+  production:
+    name: "Terraform Apply Production"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ secrets.TERRAFORM_VERSION }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: "Install dependencies"
+        id: deps
+        run: pip install Jinja2 PyYAML boto3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-skip-session-tagging: true
+          aws-access-key-id: ${{ secrets.ACTIONS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ACTIONS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_GHA_ROLE }}
+          role-duration-seconds: 900
+          aws-region: eu-west-2
+
+      - name: "Bootstrap"
+        id: bootstrap
+        run: |
+          python bootstrap.py > ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+        working-directory: .
+        env:
+          TF_WORKSPACE: default
+          AWS_SECRETS_ROLE: ${{ secrets.AWS_GHA_ROLE }}
+          AWS_DEFAULT_REGION: eu-west-2
+
+      - name: "Terraform Init"
+        id: init
+        run: terraform init >> ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+        env:
+          TF_WORKSPACE: default
+          AWS_DEFAULT_REGION: eu-west-2
+
+      - name: "Terraform Apply"
+        id: apply
+        run: |
+          terraform plan -no-color -out terraform.plan >> ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+          terraform apply -no-color -auto-approve terraform.plan >> ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+        continue-on-error: false
+        env:
+          TF_WORKSPACE: default
+          TF_INPUT: false
+          AWS_DEFAULT_REGION: eu-west-2
+
+      - name: "Terraform Plan"
+        id: plan
+        run: terraform plan -no-color -detailed-exitcode >> ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+        continue-on-error: false
+        env:
+          TF_WORKSPACE: default
+          TF_INPUT: false
+          AWS_DEFAULT_REGION: eu-west-2
+
+      - name: "Redact Logs PROD"
+        if: steps.plan.conclusion == 'failure'
+        id: redact-logs-prod
+        run: |
+              sed -i "s/$ACC_PROD/REDACTED/g" ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+        shell: bash
+        env:
+          ACC_PROD: ${{ secrets.AWS_GHA_ACC_PROD }}
+
+      - uses: actions/upload-artifact@v2
+        if: steps.redact-logs-prod.conclusion == 'success'
+        with:
+          name: prod-workflow-log
+          path: ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log

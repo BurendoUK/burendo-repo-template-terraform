@@ -1,0 +1,22 @@
+name: "Push Checks"
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "**/*.tf"
+
+jobs:
+  push:
+    name: "On Terraform Push"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ secrets.TERRAFORM_VERSION }}
+
+      - name: "Terraform Format"
+        id: fmt
+        run: terraform fmt -recursive
+        continue-on-error: true
