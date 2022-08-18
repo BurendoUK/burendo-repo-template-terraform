@@ -74,6 +74,7 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
       
       - name: "Terminate Session"
+        if: ${{ always() }}
         id: terminate-session
         run: |
           set -e
