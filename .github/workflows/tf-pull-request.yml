@@ -33,6 +33,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.ACTIONS_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.AWS_GHA_ROLE }}
           role-duration-seconds: 900
+          role-session-name: ${{ github.run_id }}-${{ github.run_number }}
           aws-region: eu-west-2
 
       - name: "Bootstrap"
@@ -59,6 +60,13 @@ jobs:
         env:
           TF_WORKSPACE: default
           AWS_DEFAULT_REGION: eu-west-2
+      
+      - name: "Terminate Session"
+        if: ${{ always() }}
+        id: terminate-session
+        run: |
+          set -e
+          aws ssm terminate-session --session-id ${{ github.run_id }}-${{ github.run_number }}
 
       - name: "Redact Logs PROD PR"
         if: steps.plan.conclusion == 'failure'
