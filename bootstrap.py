@@ -33,6 +33,7 @@ def main():
 
     config_data = yaml.load(terraform_secret['SecretBinary'], Loader=yaml.FullLoader)
     config_data['terraform'] = json.loads(terraform_secret['SecretBinary'])["terraform"]
+    config_data['accounts'] = json.loads(terraform_secret['SecretBinary'])["accounts"]
 
     with open("terraform.tf.j2") as in_template:
         template = jinja2.Template(in_template.read())
