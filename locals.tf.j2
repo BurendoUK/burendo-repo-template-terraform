@@ -1,8 +1,8 @@
 locals {
   environment = terraform.workspace == "default" ? "burendo-prod" : terraform.workspace
-  account = {
-    "burendo-prod" = "{{accounts.burendo-prod}}"
-  }
+  account = { {% for key, value in accounts.items() %}
+      {{key}} = "{{value}}"{% endfor %}
+    }
 
   tags = {
     Environment = local.environment
