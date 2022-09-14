@@ -7,7 +7,7 @@ terraform {
     region         = "{{terraform.state_file_region}}"
     encrypt        = false
     dynamodb_table = "terraform-state-lock"
-    kms_key_id     = "{{terraform.state_kms_key_id}}"
+    kms_key_id     = "arn:aws:kms:{{terraform.state_file_region}}:{{terraform.aws_production_acc}}:key/{{terraform.state_kms_key_id}}"
   }
 
   required_providers {
