@@ -8,6 +8,7 @@ terraform {
     encrypt        = false
     dynamodb_table = "terraform-state-lock"
     kms_key_id     = "arn:aws:kms:{{terraform.state_file_region}}:{{terraform.aws_production_acc}}:key/{{terraform.state_kms_key_id}}"
+    role_arn       = "arn:aws:iam::{{terraform.aws_production_acc}}:role/{{terraform.state_role}}"
   }
 
   required_providers {
