@@ -39,7 +39,8 @@ jobs:
       - name: "Bootstrap"
         id: bootstrap
         run: |
-          python bootstrap.py
+          python bootstrap.py > ${{ github.workspace }}/${{ github.run_id }}-${{ github.run_number }}.log
+          sed -i "s/Administrator/ci/" variables.tf
         working-directory: .
         env:
           TF_WORKSPACE: default
